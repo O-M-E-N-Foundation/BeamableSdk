@@ -1,0 +1,45 @@
+{
+  "name": "BeamableSDK",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --outDir dist && tsup src/cli/beamable.ts src/cli/generateTypes.ts --format cjs --outDir dist/cli",
+    "clean": "rimraf dist",
+    "prepare": "npm run build",
+    "test": "vitest run",
+    "test:watch": "vitest --watch",
+    "generateTypes": "tsx ./src/cli/beamable.ts generateTypes"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.53.1",
+    "@types/node": "^24.0.3",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.5.0",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "json2ts": "^0.0.7"
+  },
+  "bin": {
+    "beamable": "./dist/cli/beamable.js"
+  }
+}
