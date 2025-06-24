@@ -2,27 +2,79 @@
 
 The Stats module provides methods for managing player statistics and data.
 
-## 📋 API Methods
+## �� API Methods
 
-### `getClientStats(playerId: number)`
-Get statistics for a player.
+### `buildPlayerObjectId(playerId: number | string, domain?: string, access?: string): string`
+Helper to build a player stats objectId. Defaults: domain = 'client', access = 'public'.
+
+**Example:**
+```typescript
+const objectId = StatsModule.buildPlayerObjectId(context.playerId!); // e.g., 'client.public.player.12345'
+```
+
+---
+
+### `getStats(objectId: string)`
+Get stats for a given objectId.
 
 **Returns:** `Promise<StatsResponse>`
 
 **Example:**
 ```typescript
-const stats = await context.Stats.getClientStats(context.playerId!);
+const objectId = StatsModule.buildPlayerObjectId(context.playerId!);
+const stats = await context.Stats.getStats(objectId);
 console.log(stats);
 ```
 
 ---
 
-### `setClientStats(playerId: number, stats: Record<string, any>)`
-Set statistics for a player.
+### `setStats(objectId: string, stats: Record<string, any>)`
+Set stats for a given objectId.
 
-**Returns:** `Promise<void>`
+**Returns:** `Promise<StatsResponse>`
 
 **Example:**
 ```typescript
-await context.Stats.setClientStats(context.playerId!, { score: 100, level: 5 });
+const objectId = StatsModule.buildPlayerObjectId(context.playerId!);
+await context.Stats.setStats(objectId, { score: 100, level: 5 });
+```
+
+---
+
+### `deleteStats(objectId: string, keys: string[])`
+Delete specific stat keys for a given objectId.
+
+**Returns:** `Promise<StatsResponse>`
+
+**Example:**
+```typescript
+const objectId = StatsModule.buildPlayerObjectId(context.playerId!);
+await context.Stats.deleteStats(objectId, ['score', 'level']);
+```
+
+---
+
+### `getPlayerStats(objectId: string)`
+Get player stats for a given objectId using the `/client` endpoint (browser/JS safe).
+
+**Returns:** `Promise<StatsResponse>`
+
+**Example:**
+```typescript
+const objectId = StatsModule.buildPlayerObjectId(context.playerId!);
+const stats = await context.Stats.getPlayerStats(objectId);
+console.log(stats);
+```
+
+---
+
+### `setPlayerStats(objectId: string, stats: Record<string, any>)`
+Set player stats for a given objectId using the `/client` endpoint (browser/JS safe).
+
+**Returns:** `Promise<StatsResponse>`
+
+**Example:**
+```typescript
+const objectId = StatsModule.buildPlayerObjectId(context.playerId!);
+await context.Stats.setPlayerStats(objectId, { score: 200 });
 ``` 
