@@ -7,19 +7,19 @@ This guide will help you install and configure the Beamable JavaScript SDK for y
 ### NPM Installation
 
 ```bash
-npm install beamable-javascript-sdk
+npm install BeamableSDK
 ```
 
 ### Yarn Installation
 
 ```bash
-yarn add beamable-javascript-sdk
+yarn add BeamableSDK
 ```
 
 ### PNPM Installation
 
 ```bash
-pnpm add beamable-javascript-sdk
+pnpm add BeamableSDK
 ```
 
 ## 🔧 Environment Setup
@@ -63,7 +63,7 @@ process.env.VITE_PID = 'your-project-id';
 ### Basic Setup
 
 ```typescript
-import { configureBeamable } from 'beamable-javascript-sdk';
+import { configureBeamable } from 'BeamableSDK';
 
 // Configure the SDK with your credentials
 configureBeamable({
@@ -104,7 +104,7 @@ export default defineConfig({
     global: 'globalThis',
   },
   optimizeDeps: {
-    include: ['beamable-javascript-sdk']
+    include: ['BeamableSDK']
   }
 });
 ```
@@ -116,7 +116,7 @@ export default defineConfig({
 Create a simple test file to verify everything is working:
 
 ```typescript
-import { configureBeamable, BeamContext } from 'beamable-javascript-sdk';
+import { configureBeamable, BeamContext } from 'BeamableSDK';
 
 async function testInstallation() {
   try {
@@ -174,7 +174,7 @@ If you see network errors:
 
 ```typescript
 // In your main App.tsx or index.tsx
-import { configureBeamable } from 'beamable-javascript-sdk';
+import { configureBeamable } from 'BeamableSDK';
 
 // Configure once at app startup
 configureBeamable({
@@ -188,7 +188,7 @@ configureBeamable({
 
 ```typescript
 // In your main.ts
-import { configureBeamable } from 'beamable-javascript-sdk';
+import { configureBeamable } from 'BeamableSDK';
 
 configureBeamable({
   cid: import.meta.env.VITE_CID,
@@ -201,7 +201,7 @@ configureBeamable({
 
 ```typescript
 // In your main server file
-import { configureBeamable } from 'beamable-javascript-sdk';
+import { configureBeamable } from 'BeamableSDK';
 import dotenv from 'dotenv';
 
 dotenv.config();

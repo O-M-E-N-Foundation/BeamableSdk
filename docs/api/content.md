@@ -13,7 +13,7 @@ The Content module allows you to:
 ## 🔧 Basic Usage
 
 ```typescript
-import { BeamContext } from 'beamable-javascript-sdk';
+import { BeamContext } from 'BeamableSDK';
 
 const context = await BeamContext.Default;
 const content = context.Content;
@@ -272,7 +272,7 @@ const batchResults = await fetchMultipleContent([
 ### Complete Content Management Example
 
 ```typescript
-import { BeamContext } from 'beamable-javascript-sdk';
+import { BeamContext } from 'BeamableSDK';
 import type { RootObject as AbilityMaps } from '../types/content/AbilityMaps';
 import type { RootObject as Minions } from '../types/content/Minions';
 

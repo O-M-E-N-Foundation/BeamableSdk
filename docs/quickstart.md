@@ -9,7 +9,7 @@ Get up and running with the Beamable JavaScript SDK in minutes. This guide will 
 First, ensure you have the SDK installed and configured (see [Installation Guide](installation.md)):
 
 ```typescript
-import { configureBeamable, BeamContext } from 'beamable-javascript-sdk';
+import { configureBeamable, BeamContext } from 'BeamableSDK';
 
 // Configure the SDK
 configureBeamable({
@@ -143,7 +143,7 @@ console.log('Player stats:', stats);
 Here's a complete example that demonstrates the main features:
 
 ```typescript
-import { configureBeamable, BeamContext } from 'beamable-javascript-sdk';
+import { configureBeamable, BeamContext } from 'BeamableSDK';
 
 async function beamableExample() {
   try {

@@ -5,23 +5,23 @@ The Beamable JavaScript SDK is built with a modular, type-safe architecture that
 ## 🏗️ High-Level Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────┐
 │                    Your Application                        │
-├─────────────────────────────────────────────────────────────┤
+├──────────────────────────────────────────────────────────────┤
 │                    BeamContext                             │
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────┐ │
-│  │    Auth     │ │   Content   │ │  Inventory  │ │  Stats  │ │
-│  │   Module    │ │   Module    │ │   Module    │ │ Module  │ │
-│  └─────────────┘ └─────────────┘ └─────────────┘ └─────────┘ │
-├─────────────────────────────────────────────────────────────┤
+│  ┌───────────────┐ ┌───────────────┐ ┌───────────────┐ ┌─────┐ │
+│  │    Auth       │ │   Content     │ │  Inventory    │ │Stats│ │
+│  │   Module      │ │   Module      │ │   Module      │ │Module│ │
+│  └───────────────┘ └───────────────┘ └───────────────┘ └─────┘ │
+├──────────────────────────────────────────────────────────────┤
 │                   BeamableCore                             │
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────┐ │
-│  │   HTTP      │ │   Auth      │ │   Config    │ │  Cache  │ │
-│  │  Client     │ │  Manager    │ │  Manager    │ │ Manager │ │
-│  └─────────────┘ └─────────────┘ └─────────────┘ └─────────┘ │
-├─────────────────────────────────────────────────────────────┤
-│                   Beamable API                             │
-└─────────────────────────────────────────────────────────────┘
+│  ┌───────────────┐ ┌───────────────┐ ┌───────────────┐ ┌─────┐ │
+│  │   HTTP        │ │   Auth        │ │   Config      │ │Cache│ │
+│  │  Client       │ │  Manager      │ │  Manager      │ │Manager│ │
+│  └───────────────┘ └───────────────┘ └───────────────┘ └─────┘ │
+├──────────────────────────────────────────────────────────────┤
+│                   Beamable API                              │
+└──────────────────────────────────────────────────────────────┘
 ```
 
 ## 🎯 Design Principles
@@ -53,6 +53,8 @@ The Beamable JavaScript SDK is built with a modular, type-safe architecture that
 The central orchestrator that provides access to all SDK functionality.
 
 ```typescript
+import { BeamContext } from 'BeamableSDK';
+
 class BeamContext {
   // Singleton instance
   static get Default(): Promise<BeamContext>
@@ -84,6 +86,8 @@ class BeamContext {
 The low-level foundation that handles HTTP communication, authentication, and configuration.
 
 ```typescript
+import { BeamableCore } from 'BeamableSDK';
+
 class BeamableCore {
   // Configuration
   static configure(config: BeamableConfig): void
@@ -112,6 +116,9 @@ class BeamableCore {
 Each module follows a consistent pattern:
 
 ```typescript
+// Example module import
+import { AuthModule, ContentModule, InventoryModule, StatsModule } from 'BeamableSDK';
+
 class ModuleName {
   constructor(private context: BeamContext) {}
   
@@ -132,6 +139,8 @@ class ModuleName {
 Handles all authentication-related operations.
 
 ```typescript
+import { AuthModule } from 'BeamableSDK';
+
 class AuthModule {
   // Guest authentication
   async guestLogin(): Promise<GuestLoginResponse>
@@ -153,6 +162,8 @@ class AuthModule {
 Provides type-safe access to Beamable content.
 
 ```typescript
+import { ContentModule } from 'BeamableSDK';
+
 class ContentModule {
   // Content fetching
   async getPublicManifest(): Promise<ContentManifestResponse>
@@ -166,6 +177,8 @@ class ContentModule {
 Manages player inventory and items.
 
 ```typescript
+import { InventoryModule } from 'BeamableSDK';
+
 class InventoryModule {
   // Inventory operations
   async getInventory(playerId: string): Promise<InventoryResponse>
@@ -179,6 +192,8 @@ class InventoryModule {
 Handles player statistics and data.
 
 ```typescript
+import { StatsModule } from 'BeamableSDK';
+
 class StatsModule {
   // Statistics operations
   async getClientStats(playerId: string): Promise<StatsResponse>
