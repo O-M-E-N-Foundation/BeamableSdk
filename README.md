@@ -47,7 +47,7 @@ A modern, type-safe JavaScript/TypeScript SDK for Beamable, featuring modular ar
 ## 🛠️ Quick Installation
 
 ```bash
-npm install beamable-javascript-sdk
+npm install BeamableSDK
 ```
 
 ## 🔧 Type Generation
@@ -90,7 +90,7 @@ npm run generateTypes
 ## 🎯 Quick Example
 
 ```typescript
-import { BeamContext, configureBeamable } from 'beamable-javascript-sdk';
+import { BeamContext, configureBeamable } from 'BeamableSDK';
 
 // Configure the SDK
 configureBeamable({
