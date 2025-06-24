@@ -2,7 +2,7 @@
 
 The Stats module provides methods for managing player statistics and data.
 
-## �� API Methods
+## 📋 API Methods
 
 ### `buildPlayerObjectId(playerId: number | string, domain?: string, access?: string): string`
 Helper to build a player stats objectId. Defaults: domain = 'client', access = 'public'.
