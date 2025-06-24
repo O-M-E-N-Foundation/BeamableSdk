@@ -15,10 +15,16 @@ The Beamable JavaScript SDK is built with a modular, type-safe architecture that
 │  └───────────────┘ └───────────────┘ └───────────────┘ └─────┘ │
 ├──────────────────────────────────────────────────────────────┤
 │                   BeamableCore                             │
-│  ┌───────────────┐ ┌───────────────┐ ┌───────────────┐ ┌─────┐ │
-│  │   HTTP        │ │   Auth        │ │   Config      │ │Cache│ │
-│  │  Client       │ │  Manager      │ │  Manager      │ │Manager│ │
-│  └───────────────┘ └───────────────┘ └───────────────┘ └─────┘ │
+│  ┌───────────────┐                                         │
+│  │   Config      │                                         │
+│  │   & Token     │                                         │
+│  │   Storage     │                                         │
+│  └───────────────┘                                         │
+│  ┌───────────────┐                                         │
+│  │   HTTP        │                                         │
+│  │   Request     │                                         │
+│  │   Methods     │                                         │
+│  └───────────────┘                                         │
 ├──────────────────────────────────────────────────────────────┤
 │                   Beamable API                              │
 └──────────────────────────────────────────────────────────────┘
@@ -34,7 +40,7 @@ The Beamable JavaScript SDK is built with a modular, type-safe architecture that
 ### 2. **Context Pattern**
 - **Unified Interface**: Single entry point for all SDK operations
 - **State Management**: Centralized authentication and configuration state
-- **Lifecycle Management**: Automatic initialization and cleanup
+- **Lifecycle Management**: Automatic initialization and setup
 
 ### 3. **Type Safety**
 - **Generic APIs**: Type-safe content fetching with TypeScript generics
@@ -57,21 +63,18 @@ import { BeamContext } from 'BeamableSDK';
 
 class BeamContext {
   // Singleton instance
-  static get Default(): Promise<BeamContext>
-  
+  static get Default(): Promise<BeamContext>;
+
   // Module access
-  readonly Auth: AuthModule
-  readonly Content: ContentModule
-  readonly Inventory: InventoryModule
-  readonly Stats: StatsModule
-  
+  readonly Auth: AuthModule;
+  readonly Content: ContentModule;
+  readonly Inventory: InventoryModule;
+  readonly Stats: StatsModule;
+
   // State
-  readonly playerId: string | null
-  readonly onReady: Promise<void>
-  
-  // Lifecycle
-  initialize(): Promise<void>
-  dispose(): void
+  readonly playerId: number | null;
+  readonly onReady: Promise<void>;
+  readonly core: BeamableCore;
 }
 ```
 
@@ -80,26 +83,26 @@ class BeamContext {
 - **Async Initialization**: Handles authentication and setup
 - **Module Access**: Provides typed access to all modules
 - **State Management**: Tracks authentication and player state
+- **onReady**: Promise that resolves when the context is fully initialized (after login and player info fetch)
 
 ### BeamableCore
 
 The low-level foundation that handles HTTP communication, authentication, and configuration.
 
 ```typescript
-import { BeamableCore } from 'BeamableSDK';
+import { BeamableCore, BeamableConfig } from 'BeamableSDK';
 
 class BeamableCore {
-  // Configuration
-  static configure(config: BeamableConfig): void
-  
-  // HTTP client
-  readonly httpClient: HttpClient
-  
-  // Authentication
-  readonly authManager: AuthManager
-  
-  // Configuration
-  readonly config: BeamableConfig
+  // Static configuration
+  static configure(config: BeamableConfig): void;
+  static get globalConfig(): BeamableConfig;
+
+  // Instance methods
+  constructor(config?: BeamableConfig);
+  setTokens(accessToken: string, refreshToken?: string): void;
+  getTokens(): { accessToken: string | null; refreshToken: string | null };
+  request(method: string, path: string, data?: any, opts?: { auth?: boolean, microservice?: boolean | string }): Promise<any>;
+  requestMicroservice(method: string, msName: string, path: string, data?: any, opts?: { auth?: boolean }): Promise<any>;
 }
 ```
 
@@ -113,25 +116,21 @@ class BeamableCore {
 
 ### Module Pattern
 
-Each module follows a consistent pattern:
+Each module is constructed with a `BeamableCore` instance (and sometimes the `BeamContext`).
 
 ```typescript
 // Example module import
 import { AuthModule, ContentModule, InventoryModule, StatsModule } from 'BeamableSDK';
 
-class ModuleName {
-  constructor(private context: BeamContext) {}
-  
-  // Public API methods
-  async methodName(params: Params): Promise<Result> {
-    // Implementation
-  }
-  
-  // Private helper methods
-  private helperMethod(): void {
-    // Internal logic
-  }
+class AuthModule {
+  constructor(core: BeamableCore, context?: BeamContext) {}
+  // ...methods
 }
+class ContentModule {
+  constructor(core: BeamableCore) {}
+  // ...methods
+}
+// ...other modules follow similar pattern
 ```
 
 ### Auth Module
@@ -142,18 +141,11 @@ Handles all authentication-related operations.
 import { AuthModule } from 'BeamableSDK';
 
 class AuthModule {
-  // Guest authentication
-  async guestLogin(): Promise<GuestLoginResponse>
-  
-  // User authentication
-  async registerUser(email: string, password: string): Promise<RegisterResponse>
-  async loginUser(email: string, password: string): Promise<LoginResponse>
-  
-  // Account management
-  async getCurrentAccount(): Promise<AccountResponse>
-  
-  // Third-party auth
-  async thirdPartyLogin(provider: string, token: string): Promise<LoginResponse>
+  async guestLogin(): Promise<void>;
+  async loginUser(usernameOrEmail: string, password: string): Promise<LoginResponse>;
+  async registerUser(usernameOrEmail: string, password: string): Promise<RegisterUserResponse>;
+  async getCurrentAccount(): Promise<AccountMeResponse>;
+  // ...other methods for third-party, device, federated login, etc.
 }
 ```
 
@@ -165,10 +157,9 @@ Provides type-safe access to Beamable content.
 import { ContentModule } from 'BeamableSDK';
 
 class ContentModule {
-  // Content fetching
-  async getPublicManifest(): Promise<ContentManifestResponse>
-  async getContent<T>(contentId: string): Promise<T>
-  async getContentByType<T>(contentType: string): Promise<T[]>
+  async getPublicManifest(): Promise<ContentManifestResponse>;
+  async getContent<T>(contentId: string): Promise<T>;
+  async getContentByType<T>(contentType: string): Promise<T[]>;
 }
 ```
 
@@ -180,10 +171,9 @@ Manages player inventory and items.
 import { InventoryModule } from 'BeamableSDK';
 
 class InventoryModule {
-  // Inventory operations
-  async getInventory(playerId: string): Promise<InventoryResponse>
-  async addItem(playerId: string, itemId: string, amount: number): Promise<void>
-  async removeItem(playerId: string, itemId: string, amount: number): Promise<void>
+  async getInventory(playerId: number): Promise<InventoryResponse>;
+  async addItem(playerId: number, itemId: string, amount: number): Promise<void>;
+  async removeItem(playerId: number, itemId: string, amount: number): Promise<void>;
 }
 ```
 
@@ -195,9 +185,8 @@ Handles player statistics and data.
 import { StatsModule } from 'BeamableSDK';
 
 class StatsModule {
-  // Statistics operations
-  async getClientStats(playerId: string): Promise<StatsResponse>
-  async setClientStats(playerId: string, stats: Record<string, any>): Promise<void>
+  async getClientStats(playerId: number): Promise<StatsResponse>;
+  async setClientStats(playerId: number, stats: Record<string, any>): Promise<void>;
 }
 ```
 
@@ -208,15 +197,15 @@ class StatsModule {
 ```
 Application Start
        ↓
-Configure BeamableCore
+configureBeamable({ cid, pid, apiUrl })
        ↓
-Create BeamContext
+BeamContext.Default
        ↓
-Initialize Auth Manager
+BeamContext authenticates (guest or user login)
        ↓
-Perform Guest Login (if needed)
+BeamContext fetches player info
        ↓
-Context Ready
+BeamContext.onReady resolves
 ```
 
 ### 2. Content Fetching Flow
