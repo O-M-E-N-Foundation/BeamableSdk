@@ -1,6 +1,6 @@
 # Beamable JavaScript SDK
 
-A modern, type-safe JavaScript/TypeScript SDK for Beamable, featuring modular architecture, comprehensive authentication, content management, and developer-friendly tooling.
+A modern, type-safe JavaScript/TypeScript SDK for Beamable, featuring modular architecture, comprehensive authentication, content management, and developer-friendly tooling. Supports both client and server (admin) use cases from a single SDK.
 
 ## 🚀 Features
 
@@ -10,6 +10,7 @@ A modern, type-safe JavaScript/TypeScript SDK for Beamable, featuring modular ar
 - **🛠️ Developer Tools** - CLI for type generation and content management
 - **✅ Comprehensive Testing** - Full test coverage with real API integration
 - **📱 Modern JavaScript** - ESM/CJS compatible with TypeScript support
+- **🛡️ Server/Admin Mode** - Signed requests, player impersonation, and admin APIs
 
 ## 📚 Documentation
 
@@ -68,6 +69,8 @@ npm run generateTypes
    VITE_CID=your-customer-id
    VITE_PID=your-project-id
    VITE_API_URL=https://api.beamable.com
+   # For server mode:
+   VITE_SECRET=your-server-secret
    ```
 
 2. Run the type generation tool:
@@ -87,20 +90,21 @@ npm run generateTypes
 - Places them in your project's `src/types/content/` directory
 - Cleans up obsolete type files automatically
 
-## 🎯 Quick Example
+## 🎯 Quick Example (Client & Server)
 
+### Client Mode (Browser, Desktop, Mobile)
 ```typescript
 import { BeamContext, configureBeamable } from 'BeamableSDK';
 
-// Configure the SDK
+// Configure the SDK (client mode)
 configureBeamable({
   cid: 'your-customer-id',
   pid: 'your-project-id',
   apiUrl: 'https://api.beamable.com'
 });
 
-// Get the context and authenticate
 const context = await BeamContext.Default;
+await context.onReady;
 
 // Fetch type-safe content
 const abilityMap = await context.Content.getContent<AbilityMaps>('AbilityMaps.VitalityAura');
@@ -108,6 +112,34 @@ const allMinions = await context.Content.getContentByType<Minions>('Minions');
 
 console.log(`Ability: ${abilityMap.properties.actions.data[0].abilityName}`);
 ```
+
+### 🛡️ Server Mode (Admin/Backend)
+```typescript
+import { BeamContext, configureBeamable } from 'BeamableSDK';
+
+configureBeamable({
+  cid: process.env.VITE_CID!,
+  pid: process.env.VITE_PID!,
+  apiUrl: process.env.VITE_API_URL || 'https://api.beamable.com',
+  secret: process.env.VITE_SECRET!,
+  mode: 'server'
+});
+const context = await BeamContext.Default;
+
+// Impersonate any player using gamertag
+const playerId = '1234567890';
+const inventory = await context.Inventory.getInventory(playerId, playerId); // gamertag = playerId
+const stats = await context.Stats.getStats(`client.public.player.${playerId}`, playerId);
+
+// Call server-only/admin APIs
+const params = new URLSearchParams({ query: 'marco@mantical.ai', page: '0', pagesize: '10' }).toString();
+const accounts = await context.core.request('GET', `/basic/accounts/search?${params}`);
+console.log('Accounts:', accounts);
+```
+
+**Security Note:**
+- Never expose your server secret in client-side code.
+- Use server mode only in trusted backend environments.
 
 ## 📦 Package Structure
 
