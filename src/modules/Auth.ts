@@ -95,154 +95,129 @@ export class AuthModule {
     this.context?._resolveOnReady();
   }
 
-  /** Username or email login */
-  async loginUser(usernameOrEmail: string, password: string): Promise<LoginResponse> {
+  /** Username or email login. Optionally impersonate a player in server mode by passing gamertag. */
+  async loginUser(usernameOrEmail: string, password: string, gamertag?: string): Promise<LoginResponse> {
     const response = await this.core.request('POST', '/basic/auth/token', {
       grant_type: 'password',
       username: usernameOrEmail,
       password,
-    });
+    }, gamertag ? { gamertag } : undefined);
     this.core.setTokens(response.access_token, response.refresh_token);
     this.context?._resolveOnReady();
     return response;
   }
 
-  /** Register a new user with username or email */
-  async registerUser(usernameOrEmail: string, password: string): Promise<RegisterUserResponse> {
+  /** Register a new user with username or email. Optionally impersonate a player in server mode by passing gamertag. */
+  async registerUser(usernameOrEmail: string, password: string, gamertag?: string): Promise<RegisterUserResponse> {
     const response = await this.core.request('POST', '/basic/accounts/register', {
       email: usernameOrEmail,
       password,
-    }, { auth: true });
+    }, gamertag ? { auth: true, gamertag } : { auth: true });
     return response;
   }
 
-  /** External identity login (Federated Login) */
-  async loginWithExternal(providerService: string, providerNamespace: string, externalToken: string): Promise<any> {
+  /** External identity login (Federated Login). Optionally impersonate a player in server mode by passing gamertag. */
+  async loginWithExternal(providerService: string, providerNamespace: string, externalToken: string, gamertag?: string): Promise<any> {
     const response = await this.core.request('POST', '/basic/auth/token', {
       grant_type: 'external',
       provider_service: providerService,
       provider_namespace: providerNamespace,
       external_token: externalToken,
-    });
+    }, gamertag ? { gamertag } : undefined);
     this.core.setTokens(response.access_token, response.refresh_token);
     this.context?._resolveOnReady();
     return response;
   }
 
-  /** Device ID login (experimental: using grant_type 'device' and client_id field) */
-  async loginWithDeviceId(deviceId: string): Promise<LoginResponse> {
+  /** Device ID login (experimental). Optionally impersonate a player in server mode by passing gamertag. */
+  async loginWithDeviceId(deviceId: string, gamertag?: string): Promise<LoginResponse> {
     const response = await this.core.request('POST', '/basic/auth/token', {
       grant_type: 'device',
       client_id: deviceId,
-    });
+    }, gamertag ? { gamertag } : undefined);
     this.core.setTokens(response.access_token, response.refresh_token);
     this.context?._resolveOnReady();
     return response;
   }
 
-  /** Refresh token */
-  async refreshToken(refreshToken: string): Promise<LoginResponse> {
+  /** Refresh token. Optionally impersonate a player in server mode by passing gamertag. */
+  async refreshToken(refreshToken: string, gamertag?: string): Promise<LoginResponse> {
     const response = await this.core.request('POST', '/basic/auth/token', {
       grant_type: 'refresh_token',
       refresh_token: refreshToken,
-    });
+    }, gamertag ? { gamertag } : undefined);
     this.core.setTokens(response.access_token, response.refresh_token);
     this.context?._resolveOnReady();
     return response;
   }
 
-  /** Third-party login (Google, Apple, Steam, Facebook) */
-  async loginWithThirdParty(thirdParty: AuthThirdParty, externalToken: string): Promise<any> {
+  /** Third-party login. Optionally impersonate a player in server mode by passing gamertag. */
+  async loginWithThirdParty(thirdParty: AuthThirdParty, externalToken: string, gamertag?: string): Promise<any> {
     const response = await this.core.request('POST', '/basic/auth/token', {
       grant_type: 'third_party',
       third_party: thirdParty,
       external_token: externalToken,
-    });
+    }, gamertag ? { gamertag } : undefined);
     this.core.setTokens(response.access_token, response.refresh_token);
     this.context?._resolveOnReady();
     return response;
   }
 
-  /** Check if a third-party account is available */
-  async isThirdPartyAvailable(thirdParty: AuthThirdParty, externalToken: string): Promise<any> {
+  /** Check if a third-party account is available. Optionally impersonate a player in server mode by passing gamertag. */
+  async isThirdPartyAvailable(thirdParty: AuthThirdParty, externalToken: string, gamertag?: string): Promise<any> {
     const params = new URLSearchParams({
       third_party: thirdParty,
       external_token: externalToken,
     });
-    return this.core.request('GET', `/basic/accounts/available/third-party?${params.toString()}`);
+    return this.core.request('GET', `/basic/accounts/available/third-party?${params.toString()}`, undefined, gamertag ? { gamertag } : undefined);
   }
 
-  /** Check if an email is available (not already registered) */
-  async isEmailAvailable(email: string): Promise<IsEmailAvailableResponse> {
+  /** Check if an email is available (not already registered). Optionally impersonate a player in server mode by passing gamertag. */
+  async isEmailAvailable(email: string, gamertag?: string): Promise<IsEmailAvailableResponse> {
     const params = new URLSearchParams({ email });
-    return this.core.request('GET', `/basic/accounts/available?${params.toString()}`);
+    return this.core.request('GET', `/basic/accounts/available?${params.toString()}`, undefined, gamertag ? { gamertag } : undefined);
   }
 
-  /**
-   * Initiate password update (reset) for a user. Sends a code to the user's email.
-   * @param email The user's email address
-   */
-  async passwordUpdateInit(email: string): Promise<any> {
-    return this.core.request('POST', '/basic/accounts/password-update/init', { email });
+  /** Initiate password update (reset) for a user. Optionally impersonate a player in server mode by passing gamertag. */
+  async passwordUpdateInit(email: string, gamertag?: string): Promise<any> {
+    return this.core.request('POST', '/basic/accounts/password-update/init', { email }, gamertag ? { gamertag } : undefined);
   }
 
-  /**
-   * Confirm password update with code and new password.
-   * @param email The user's email address
-   * @param code The code sent to the user's email
-   * @param newPassword The new password to set
-   */
-  async passwordUpdateConfirm(email: string, code: string, newPassword: string): Promise<any> {
+  /** Confirm password update with code and new password. Optionally impersonate a player in server mode by passing gamertag. */
+  async passwordUpdateConfirm(email: string, code: string, newPassword: string, gamertag?: string): Promise<any> {
     return this.core.request('POST', '/basic/accounts/password-update/confirm', {
       email,
       code,
       password: newPassword,
-    });
+    }, gamertag ? { gamertag } : undefined);
   }
 
-  /**
-   * Initiate email update for a user. Sends a code to the new email address.
-   * @param newEmail The new email address
-   */
-  async emailUpdateInit(newEmail: string): Promise<any> {
-    return this.core.request('POST', '/basic/accounts/email-update/init', { newEmail });
+  /** Initiate email update for a user. Optionally impersonate a player in server mode by passing gamertag. */
+  async emailUpdateInit(newEmail: string, gamertag?: string): Promise<any> {
+    return this.core.request('POST', '/basic/accounts/email-update/init', { newEmail }, gamertag ? { gamertag } : undefined);
   }
 
-  /**
-   * Confirm email update with code and password.
-   * @param code The code sent to the new email
-   * @param password The user's current password
-   */
-  async emailUpdateConfirm(code: string, password: string): Promise<any> {
+  /** Confirm email update with code and password. Optionally impersonate a player in server mode by passing gamertag. */
+  async emailUpdateConfirm(code: string, password: string, gamertag?: string): Promise<any> {
     return this.core.request('POST', '/basic/accounts/email-update/confirm', {
       code,
       password,
-    });
+    }, gamertag ? { gamertag } : undefined);
   }
 
-  /**
-   * Get the current account info for the logged-in user.
-   */
-  async getCurrentAccount(): Promise<AccountMeResponse> {
-    return this.core.request('GET', '/basic/accounts/me', undefined, { auth: true });
+  /** Get the current account info for the logged-in user. Optionally impersonate a player in server mode by passing gamertag. */
+  async getCurrentAccount(gamertag?: string): Promise<AccountMeResponse> {
+    return this.core.request('GET', '/basic/accounts/me', undefined, gamertag ? { auth: true, gamertag } : { auth: true });
   }
 
-  /**
-   * Remove a third-party association from the current account.
-   * Not testable in CI unless a third-party is linked.
-   * @param provider The third-party provider to remove (e.g., 'Google', 'Apple', etc.)
-   */
-  async removeThirdPartyAssociation(provider: AuthThirdParty): Promise<RemoveThirdPartyAssociationResponse> {
-    // The API may require a body or query param; here we send provider in the body for clarity.
-    return this.core.request('DELETE', '/basic/accounts/me/third-party', { provider });
+  /** Remove a third-party association from the current account. Optionally impersonate a player in server mode by passing gamertag. */
+  async removeThirdPartyAssociation(provider: AuthThirdParty, gamertag?: string): Promise<RemoveThirdPartyAssociationResponse> {
+    return this.core.request('DELETE', '/basic/accounts/me/third-party', { provider }, gamertag ? { gamertag } : undefined);
   }
 
-  /**
-   * Update the current account with new properties or credentials.
-   * See https://docs.beamable.com/reference/put_basic-accounts-me
-   */
-  async updateAccount(options: UpdateAccountOptions): Promise<UpdateAccountResponse> {
-    return this.core.request('PUT', '/basic/accounts/me', options, { auth: true });
+  /** Update the current account with new properties or credentials. Optionally impersonate a player in server mode by passing gamertag. */
+  async updateAccount(options: UpdateAccountOptions, gamertag?: string): Promise<UpdateAccountResponse> {
+    return this.core.request('PUT', '/basic/accounts/me', options, gamertag ? { auth: true, gamertag } : { auth: true });
   }
 
   /**

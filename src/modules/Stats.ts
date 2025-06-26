@@ -25,43 +25,37 @@ export class StatsModule {
   }
 
   /**
-   * Get stats for a given objectId
+   * Get stats for a given objectId. Optionally impersonate a player in server mode by passing gamertag.
    */
-  async getStats(objectId: string): Promise<StatsResponse> {
-    return this.core.request('GET', `/object/stats/${objectId}/`, undefined, { auth: true });
+  async getStats(objectId: string, gamertag?: string): Promise<StatsResponse> {
+    return this.core.request('GET', `/object/stats/${objectId}/`, undefined, gamertag ? { auth: true, gamertag } : { auth: true });
   }
 
   /**
-   * Set stats for a given objectId
-   * @param objectId The stats objectId
-   * @param stats The stats to set (key-value pairs)
+   * Set stats for a given objectId. Optionally impersonate a player in server mode by passing gamertag.
    */
-  async setStats(objectId: string, stats: Record<string, any>): Promise<StatsResponse> {
-    return this.core.request('POST', `/object/stats/${objectId}/`, stats, { auth: true });
+  async setStats(objectId: string, stats: Record<string, any>, gamertag?: string): Promise<StatsResponse> {
+    return this.core.request('POST', `/object/stats/${objectId}/`, stats, gamertag ? { auth: true, gamertag } : { auth: true });
   }
 
   /**
-   * Delete stats for a given objectId
-   * @param objectId The stats objectId
-   * @param keys The stat keys to delete
+   * Delete stats for a given objectId. Optionally impersonate a player in server mode by passing gamertag.
    */
-  async deleteStats(objectId: string, keys: string[]): Promise<StatsResponse> {
-    return this.core.request('DELETE', `/object/stats/${objectId}/`, { stats: keys }, { auth: true });
+  async deleteStats(objectId: string, keys: string[], gamertag?: string): Promise<StatsResponse> {
+    return this.core.request('DELETE', `/object/stats/${objectId}/`, { stats: keys }, gamertag ? { auth: true, gamertag } : { auth: true });
   }
 
   /**
-   * Get player stats for a given objectId using the /client endpoint (browser/JS safe)
-   * @see https://docs.beamable.com/reference/get_object-stats-objectid-client
+   * Get player stats for a given objectId using the /client endpoint (browser/JS safe). Optionally impersonate a player in server mode by passing gamertag.
    */
-  async getPlayerStats(objectId: string): Promise<StatsResponse> {
-    return this.core.request('GET', `/object/stats/${objectId}/client`, undefined, { auth: true });
+  async getPlayerStats(objectId: string, gamertag?: string): Promise<StatsResponse> {
+    return this.core.request('GET', `/object/stats/${objectId}/client`, undefined, gamertag ? { auth: true, gamertag } : { auth: true });
   }
 
   /**
-   * Set player stats for a given objectId using the /client endpoint (browser/JS safe)
-   * @see https://docs.beamable.com/reference/post_object-stats-objectid-client
+   * Set player stats for a given objectId using the /client endpoint (browser/JS safe). Optionally impersonate a player in server mode by passing gamertag.
    */
-  async setPlayerStats(objectId: string, stats: Record<string, any>): Promise<StatsResponse> {
-    return this.core.request('POST', `/object/stats/${objectId}/client`, stats, { auth: true });
+  async setPlayerStats(objectId: string, stats: Record<string, any>, gamertag?: string): Promise<StatsResponse> {
+    return this.core.request('POST', `/object/stats/${objectId}/client`, stats, gamertag ? { auth: true, gamertag } : { auth: true });
   }
 } 

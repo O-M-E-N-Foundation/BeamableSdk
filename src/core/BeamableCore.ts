@@ -1,8 +1,12 @@
+import CryptoJS from 'crypto-js';
+
 export interface BeamableConfig {
   apiUrl: string;
   cid: string;
   pid: string;
   hash?: string;
+  secret?: string; // For server mode
+  mode?: 'client' | 'server'; // Defaults to client
 }
 
 export class BeamableCore {
@@ -41,12 +45,16 @@ export class BeamableCore {
    * @param method HTTP method
    * @param path API path (should start with /)
    * @param data Request body
-   * @param opts Options: auth (boolean), microservice (boolean|string)
+   * @param opts Options: auth (boolean), microservice (boolean|string), gamertag (string)
    */
-  async request(method: string, path: string, data?: any, opts: { auth?: boolean, microservice?: boolean | string } = {}): Promise<any> {
+  async request(
+    method: string,
+    path: string,
+    data?: any,
+    opts: { auth?: boolean; microservice?: boolean | string; gamertag?: string } = {}
+  ): Promise<any> {
     let url: string;
     if (opts.microservice) {
-      // If a string is provided, use it as the microservice name; otherwise use CoreService
       const hash = this.config.hash || '';
       const msName = typeof opts.microservice === 'string' ? opts.microservice : 'CoreService';
       const msSlug = `/basic/${this.config.cid}.${this.config.pid}.${hash}micro_${msName}`;
@@ -58,8 +66,18 @@ export class BeamableCore {
       'Content-Type': 'application/json',
       'X-BEAM-SCOPE': `${this.config.cid}.${this.config.pid}`,
     };
-    if (opts.auth && this.accessToken) {
+    // Add Authorization for client mode
+    if (opts.auth && this.accessToken && this.config.mode !== 'server') {
       headers['Authorization'] = `Bearer ${this.accessToken}`;
+    }
+    // Server mode: sign the request
+    if (this.config.mode === 'server' && this.config.secret) {
+      const signature = this.calculateSignature(path, data);
+      headers['X-BEAM-SIGNATURE'] = signature;
+    }
+    // Add gamertag if provided
+    if (opts.gamertag) {
+      headers['X-BEAM-GAMERTAG'] = opts.gamertag;
     }
     const fetchOpts: RequestInit = {
       method,
@@ -81,9 +99,29 @@ export class BeamableCore {
    * @param msName Microservice name (e.g., 'CoreService')
    * @param path API path (should start with /)
    * @param data Request body
-   * @param opts Options: auth (boolean)
+   * @param opts Options: auth (boolean), gamertag (string)
    */
-  async requestMicroservice(method: string, msName: string, path: string, data?: any, opts: { auth?: boolean } = {}): Promise<any> {
+  async requestMicroservice(
+    method: string,
+    msName: string,
+    path: string,
+    data?: any,
+    opts: { auth?: boolean; gamertag?: string } = {}
+  ): Promise<any> {
     return this.request(method, path, data, { ...opts, microservice: msName });
+  }
+
+  /**
+   * Calculate the Beamable server signature for server mode requests.
+   * @param uriPathAndQuery The API path (should start with /)
+   * @param body The request body (object or undefined)
+   */
+  private calculateSignature(uriPathAndQuery: string, body?: object | null): string {
+    // Signature: Base64(MD5(secret + pid + version + uriPathAndQuery + (body as JSON)))
+    const version = '1';
+    let dataToSign = `${this.config.secret}${this.config.pid}${version}${uriPathAndQuery}`;
+    if (body) dataToSign += JSON.stringify(body);
+    const md5 = CryptoJS.MD5(dataToSign);
+    return CryptoJS.enc.Base64.stringify(md5);
   }
 } 

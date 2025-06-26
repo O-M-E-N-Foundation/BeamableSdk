@@ -1,8 +1,14 @@
 # Architecture Overview
 
-The Beamable JavaScript SDK is built with a modular, type-safe architecture that provides a clean separation of concerns and excellent developer experience.
+The Beamable JavaScript SDK is built with a modular, type-safe architecture that provides a clean separation of concerns and excellent developer experience. It supports both client and server (admin) modes from a single SDK.
 
-## 🏗️ High-Level Architecture
+## 🏗️ Modes: Client & Server
+
+- **Client Mode**: For browser, desktop, or mobile apps. Handles authentication, tokens, and player state automatically.
+- **Server Mode**: For backend/admin use. Requires a secret key, signs all requests, and allows impersonation of any player via `gamertag`. Skips guest login and player info fetch.
+- **Unified SDK**: The same SDK and API surface is used for both modes. Just pass `secret` and `mode: 'server'` to `configureBeamable` for server mode.
+
+## 🧩 High-Level Architecture
 
 ```
 +-------------------------------------------------------------+
@@ -17,8 +23,9 @@ The Beamable JavaScript SDK is built with a modular, type-safe architecture that
 |                      BeamableCore                           |
 |  +---------------------+   +----------------------------+   |
 |  | Config & Token      |   | HTTP Request Methods       |   |
-|  | Storage             |   |                            |   |
-|  +---------------------+   +----------------------------+   |
+|  | Storage             |   | (signs requests in server  |   |
+|  +---------------------+   |  mode with secret key)     |   |
+|                            +----------------------------+   |
 +-------------------------------------------------------------+
 |                      Beamable API                           |
 +-------------------------------------------------------------+
@@ -35,6 +42,7 @@ The Beamable JavaScript SDK is built with a modular, type-safe architecture that
 - **Unified Interface**: Single entry point for all SDK operations
 - **State Management**: Centralized authentication and configuration state
 - **Lifecycle Management**: Automatic initialization and setup
+- **Supports both client and server (admin) modes**
 
 ### 3. **Type Safety**
 - **Generic APIs**: Type-safe content fetching with TypeScript generics
@@ -50,7 +58,7 @@ The Beamable JavaScript SDK is built with a modular, type-safe architecture that
 
 ### BeamContext
 
-The central orchestrator that provides access to all SDK functionality.
+The central orchestrator that provides access to all SDK functionality. Supports both client and server (admin) modes.
 
 ```typescript
 import { BeamContext } from 'BeamableSDK';
@@ -74,14 +82,15 @@ class BeamContext {
 
 **Key Features:**
 - **Singleton Pattern**: Single instance per application
-- **Async Initialization**: Handles authentication and setup
+- **Async Initialization**: Handles authentication and setup (client mode)
 - **Module Access**: Provides typed access to all modules
-- **State Management**: Tracks authentication and player state
-- **onReady**: Promise that resolves when the context is fully initialized (after login and player info fetch)
+- **State Management**: Tracks authentication and player state (client mode)
+- **onReady**: Promise that resolves when the context is fully initialized (after login and player info fetch, client mode)
+- **Server Mode**: Skips guest login and player info fetch; all API calls can impersonate any player via `gamertag`
 
 ### BeamableCore
 
-The low-level foundation that handles HTTP communication, authentication, and configuration.
+The low-level foundation that handles HTTP communication, authentication, configuration, and request signing (server mode).
 
 ```typescript
 import { BeamableCore, BeamableConfig } from 'BeamableSDK';
@@ -95,94 +104,24 @@ class BeamableCore {
   constructor(config?: BeamableConfig);
   setTokens(accessToken: string, refreshToken?: string): void;
   getTokens(): { accessToken: string | null; refreshToken: string | null };
-  request(method: string, path: string, data?: any, opts?: { auth?: boolean, microservice?: boolean | string }): Promise<any>;
-  requestMicroservice(method: string, msName: string, path: string, data?: any, opts?: { auth?: boolean }): Promise<any>;
+  request(method: string, path: string, data?: any, opts?: { auth?: boolean, microservice?: boolean | string, gamertag?: string }): Promise<any>;
+  requestMicroservice(method: string, msName: string, path: string, data?: any, opts?: { auth?: boolean, gamertag?: string }): Promise<any>;
 }
 ```
 
 **Key Features:**
 - **HTTP Abstraction**: Handles all API communication
-- **Authentication Management**: Token storage and refresh
+- **Authentication Management**: Token storage and refresh (client mode)
 - **Configuration Management**: Environment and runtime config
+- **Request Signing**: Signs requests with your secret key in server mode
 - **Error Handling**: Centralized error processing
 
-## 🔧 Module Architecture
+## 🛡️ Server Mode & Impersonation
 
-### Module Pattern
-
-Each module is constructed with a `BeamableCore` instance (and sometimes the `BeamContext`).
-
-```typescript
-// Example module import
-import { AuthModule, ContentModule, InventoryModule, StatsModule } from 'BeamableSDK';
-
-class AuthModule {
-  constructor(core: BeamableCore, context?: BeamContext) {}
-  // ...methods
-}
-class ContentModule {
-  constructor(core: BeamableCore) {}
-  // ...methods
-}
-// ...other modules follow similar pattern
-```
-
-### Auth Module
-
-Handles all authentication-related operations.
-
-```typescript
-import { AuthModule } from 'BeamableSDK';
-
-class AuthModule {
-  async guestLogin(): Promise<void>;
-  async loginUser(usernameOrEmail: string, password: string): Promise<LoginResponse>;
-  async registerUser(usernameOrEmail: string, password: string): Promise<RegisterUserResponse>;
-  async getCurrentAccount(): Promise<AccountMeResponse>;
-  // ...other methods for third-party, device, federated login, etc.
-}
-```
-
-### Content Module
-
-Provides type-safe access to Beamable content.
-
-```typescript
-import { ContentModule } from 'BeamableSDK';
-
-class ContentModule {
-  async getPublicManifest(): Promise<ContentManifestResponse>;
-  async getContent<T>(contentId: string): Promise<T>;
-  async getContentByType<T>(contentType: string): Promise<T[]>;
-}
-```
-
-### Inventory Module
-
-Manages player inventory and items.
-
-```typescript
-import { InventoryModule } from 'BeamableSDK';
-
-class InventoryModule {
-  async getInventory(playerId: number): Promise<InventoryResponse>;
-  async addItem(playerId: number, itemId: string, amount: number): Promise<void>;
-  async removeItem(playerId: number, itemId: string, amount: number): Promise<void>;
-}
-```
-
-### Stats Module
-
-Handles player statistics and data.
-
-```typescript
-import { StatsModule } from 'BeamableSDK';
-
-class StatsModule {
-  async getClientStats(playerId: number): Promise<StatsResponse>;
-  async setClientStats(playerId: number, stats: Record<string, any>): Promise<void>;
-}
-```
+- **Server mode** is enabled by passing `secret` and `mode: 'server'` to `configureBeamable`.
+- All API modules support a `gamertag` parameter to impersonate any player.
+- Server-only/admin APIs (e.g., `/basic/accounts/search`, `/object/stats/{objectId}/`) are available in server mode.
+- Never expose your secret key in client-side code.
 
 ## 🔄 Data Flow
 
@@ -191,15 +130,13 @@ class StatsModule {
 ```
 Application Start
        ↓
-configureBeamable({ cid, pid, apiUrl })
+configureBeamable({ cid, pid, apiUrl, secret, mode: 'server' })
        ↓
 BeamContext.Default
        ↓
-BeamContext authenticates (guest or user login)
+BeamContext skips guest login and player info fetch (server mode)
        ↓
-BeamContext fetches player info
-       ↓
-BeamContext.onReady resolves
+API calls can impersonate any player via gamertag
 ```
 
 ### 2. Content Fetching Flow
@@ -207,7 +144,7 @@ BeamContext.onReady resolves
 ```
 Content Request
        ↓
-Validate Authentication
+Validate Authentication (client mode) or sign request (server mode)
        ↓
 Check Cache
        ↓
@@ -225,15 +162,15 @@ Return Result
 ```
 Auth Request
        ↓
-Validate Credentials
+Validate Credentials (client mode) or sign request (server mode)
        ↓
 HTTP Request to Auth Endpoint
        ↓
 Parse Response
        ↓
-Store Tokens
+Store Tokens (client mode)
        ↓
-Update Context State
+Update Context State (client mode)
        ↓
 Return Result
 ```

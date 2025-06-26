@@ -32,9 +32,10 @@ export class ContentModule {
   /**
    * Fetch the public content manifest
    * @see https://docs.beamable.com/reference/get_basic-content-manifest-public
+   * @param gamertag Optionally impersonate a player in server mode by passing gamertag
    */
-  async getPublicManifest(): Promise<ContentManifestResponse> {
-    return this.core.request('GET', '/basic/content/manifest/public/json');
+  async getPublicManifest(gamertag?: string): Promise<ContentManifestResponse> {
+    return this.core.request('GET', '/basic/content/manifest/public/json', undefined, gamertag ? { gamertag } : undefined);
   }
 
   /**

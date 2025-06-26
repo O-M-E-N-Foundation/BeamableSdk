@@ -4,6 +4,15 @@ import { StatsModule } from '../modules/Stats';
 import { ContentModule } from '../modules/Content';
 import { BeamableCore, BeamableConfig } from './BeamableCore';
 
+/**
+ * Configure the Beamable SDK globally.
+ *
+ * @param config - The configuration object. For server mode, pass { mode: 'server', secret: '...' } in addition to cid, pid, apiUrl, etc.
+ * Example (client):
+ *   configureBeamable({ cid, pid, apiUrl })
+ * Example (server):
+ *   configureBeamable({ cid, pid, apiUrl, secret, mode: 'server' })
+ */
 export function configureBeamable(config: BeamableConfig) {
   BeamableCore.configure(config);
 }
@@ -40,7 +49,11 @@ export class BeamContext {
   static async createDefault(): Promise<BeamContext> {
     const core = new BeamableCore(); // Uses global config
     const context = new BeamContext(core);
-    
+    // If in server mode, skip guest login and player info fetch
+    if (core['config'].mode === 'server') {
+      context._onReadyResolver?.();
+      return context;
+    }
     // If we already have an access token, fetch player info immediately
     if (core.getTokens().accessToken) {
       await context._fetchPlayerInfo();

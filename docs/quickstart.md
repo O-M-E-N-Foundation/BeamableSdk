@@ -4,14 +4,14 @@ Get up and running with the Beamable JavaScript SDK in minutes. This guide will 
 
 ## 🚀 Your First Beamable Integration
 
-### 1. Basic Setup
+### 1. Basic Setup (Client Mode)
 
 First, ensure you have the SDK installed and configured (see [Installation Guide](installation.md)):
 
 ```typescript
 import { configureBeamable, BeamContext } from 'BeamableSDK';
 
-// Configure the SDK
+// Configure the SDK (client mode)
 configureBeamable({
   cid: 'your-customer-id',
   pid: 'your-project-id',
@@ -19,12 +19,32 @@ configureBeamable({
 });
 ```
 
+### 1b. Server Mode Setup (Admin/Backend)
+
+To use the SDK for server/admin operations, initialize in server mode with your secret key:
+
+```typescript
+import { configureBeamable, BeamContext } from 'BeamableSDK';
+
+configureBeamable({
+  cid: process.env.VITE_CID!,
+  pid: process.env.VITE_PID!,
+  apiUrl: process.env.VITE_API_URL || 'https://api.beamable.com',
+  secret: process.env.VITE_SECRET!,
+  mode: 'server'
+});
+const context = await BeamContext.Default;
+```
+
+- In server mode, guest login and player info fetch are skipped.
+- All API modules support impersonation via the `gamertag` parameter.
+
 ### 2. Get the Context
 
 The `BeamContext` is your gateway to all SDK functionality:
 
 ```typescript
-// Get the default context (automatically handles authentication)
+// Get the default context (automatically handles authentication in client mode)
 const context = await BeamContext.Default;
 
 // Wait for the context to be ready
@@ -45,9 +65,9 @@ const abilityMap = await context.Content.getContent('AbilityMaps.VitalityAura');
 console.log('Ability Map:', abilityMap.id);
 ```
 
-## 🔐 Authentication Basics
+## 🔑 Authentication Basics
 
-The SDK handles authentication automatically, but you can also control it manually:
+The SDK handles authentication automatically in client mode, but you can also control it manually:
 
 ### Guest Authentication
 
@@ -76,6 +96,24 @@ console.log('Login successful:', loginResponse.access_token);
 const account = await context.Auth.getCurrentAccount();
 console.log('Current user:', account.email);
 console.log('Player ID:', context.playerId);
+```
+
+## 🛡️ Server Mode: Impersonation & Admin APIs
+
+When in server mode, you can impersonate any player by passing their player ID as the `gamertag` parameter to any API call:
+
+```typescript
+const playerId = '1234567890';
+const inventory = await context.Inventory.getInventory(playerId, playerId); // gamertag = playerId
+const stats = await context.Stats.getStats(`client.public.player.${playerId}`, playerId);
+```
+
+You can also call server-only/admin APIs, such as account search:
+
+```typescript
+const params = new URLSearchParams({ query: 'marco@mantical.ai', page: '0', pagesize: '10' }).toString();
+const accounts = await context.core.request('GET', `/basic/accounts/search?${params}`);
+console.log('Accounts:', accounts);
 ```
 
 ## 📦 Content Management
@@ -122,10 +160,14 @@ console.log(minion.properties.displayName.data);
 ### Get Player Inventory
 
 ```typescript
-// Get the current player's inventory
+// Get the current player's inventory (client mode)
 const inventory = await context.Inventory.getInventory(context.playerId!);
 console.log('Currencies:', inventory.currencies);
 console.log('Items:', inventory.items);
+
+// Get any player's inventory (server mode)
+const inventoryServer = await context.Inventory.getInventory('1234567890', '1234567890');
+console.log('Server-side inventory:', inventoryServer);
 ```
 
 ## 📊 Statistics
@@ -133,9 +175,13 @@ console.log('Items:', inventory.items);
 ### Get Player Stats
 
 ```typescript
-// Get player statistics
-const stats = await context.Stats.getClientStats(context.playerId!);
+// Get player statistics (client mode)
+const stats = await context.Stats.getPlayerStats(context.playerId!);
 console.log('Player stats:', stats);
+
+// Get any player's stats (server mode)
+const statsServer = await context.Stats.getStats(`client.public.player.1234567890`, '1234567890');
+console.log('Server-side stats:', statsServer);
 ```
 
 ## 🔄 Complete Example
@@ -147,11 +193,13 @@ import { configureBeamable, BeamContext } from 'BeamableSDK';
 
 async function beamableExample() {
   try {
-    // 1. Configure the SDK
+    // 1. Configure the SDK (client or server mode)
     configureBeamable({
       cid: 'your-customer-id',
       pid: 'your-project-id',
-      apiUrl: 'https://api.beamable.com'
+      apiUrl: 'https://api.beamable.com',
+      // secret: 'your-server-secret',
+      // mode: 'server'
     });
 
     // 2. Get the context
@@ -174,7 +222,7 @@ async function beamableExample() {
     console.log(`🎒 Inventory has ${inventory.currencies.length} currencies`);
 
     // 6. Get player stats
-    const stats = await context.Stats.getClientStats(context.playerId!);
+    const stats = await context.Stats.getPlayerStats(context.playerId!);
     console.log('📊 Player stats retrieved');
 
     console.log('🎉 All operations completed successfully!');
@@ -237,10 +285,11 @@ if (context.playerId) {
 
 ### Authentication
 
-- **Guest authentication** happens automatically
+- **Guest authentication** happens automatically (client mode)
 - **User authentication** requires explicit login
 - **Tokens are managed** automatically by the SDK
 - **Player ID** is available after authentication
+- **In server mode, guest login and player info fetch are skipped**
 
 ### Content
 

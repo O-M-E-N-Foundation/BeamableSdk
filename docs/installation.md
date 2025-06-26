@@ -22,9 +22,9 @@ yarn add BeamableSDK
 pnpm add BeamableSDK
 ```
 
-## 🔧 Environment Setup
+## 🛠️ Environment Setup
 
-### Required Environment Variables
+### Required Environment Variables (Client Mode)
 
 Create a `.env` file in your project root with the following variables:
 
@@ -42,11 +42,19 @@ VITE_API_URL=https://api.beamable.com
 VITE_HASH=your-content-hash
 ```
 
+### Additional Variables for Server Mode
+
+```env
+# Required for server mode: Your Beamable secret key
+VITE_SECRET=your-server-secret
+```
+
 ### Finding Your Credentials
 
 1. **Customer ID (CID)**: Found in your Beamable portal under Account Settings
 2. **Project ID (PID)**: Found in your Beamable portal under the specific project
 3. **API URL**: Usually `https://api.beamable.com` unless you're using a custom environment
+4. **Secret Key**: Found in your Beamable portal under Project Settings (for server/admin use)
 
 ### Environment Variable Prefix
 
@@ -56,11 +64,12 @@ The SDK uses the `VITE_` prefix for environment variables to work seamlessly wit
 // For non-Vite projects, you can set these directly
 process.env.VITE_CID = 'your-customer-id';
 process.env.VITE_PID = 'your-project-id';
+process.env.VITE_SECRET = 'your-server-secret';
 ```
 
 ## 🚀 Initial Configuration
 
-### Basic Setup
+### Basic Setup (Client Mode)
 
 ```typescript
 import { configureBeamable } from 'BeamableSDK';
@@ -73,6 +82,23 @@ configureBeamable({
   hash: process.env.VITE_HASH || ''
 });
 ```
+
+### Server Mode Setup (Admin/Backend)
+
+```typescript
+import { configureBeamable } from 'BeamableSDK';
+
+configureBeamable({
+  cid: process.env.VITE_CID!,
+  pid: process.env.VITE_PID!,
+  apiUrl: process.env.VITE_API_URL || 'https://api.beamable.com',
+  secret: process.env.VITE_SECRET!,
+  mode: 'server'
+});
+```
+
+- In server mode, the SDK signs all requests with your secret key and supports impersonation via the `gamertag` parameter.
+- Guest login and player info fetch are skipped in server mode.
 
 ### TypeScript Setup
 
@@ -120,11 +146,13 @@ import { configureBeamable, BeamContext } from 'BeamableSDK';
 
 async function testInstallation() {
   try {
-    // Configure the SDK
+    // Configure the SDK (client or server mode)
     configureBeamable({
       cid: process.env.VITE_CID!,
       pid: process.env.VITE_PID!,
-      apiUrl: 'https://api.beamable.com'
+      apiUrl: 'https://api.beamable.com',
+      // secret: process.env.VITE_SECRET!,
+      // mode: 'server'
     });
 
     // Get the context
@@ -209,7 +237,9 @@ dotenv.config();
 configureBeamable({
   cid: process.env.VITE_CID!,
   pid: process.env.VITE_PID!,
-  apiUrl: process.env.VITE_API_URL || 'https://api.beamable.com'
+  apiUrl: process.env.VITE_API_URL || 'https://api.beamable.com',
+  secret: process.env.VITE_SECRET!,
+  mode: 'server'
 });
 ```
 
@@ -228,6 +258,7 @@ configureBeamable({
 - **Validate all inputs** before sending to API
 - **Handle errors gracefully** without exposing sensitive information
 - **Use appropriate scopes** for different operations
+- **Never expose your server secret in client-side code**
 
 ## 📋 Next Steps
 

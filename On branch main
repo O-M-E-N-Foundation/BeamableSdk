@@ -1,0 +1,5 @@
+[33mede2e2a[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m docs: use  clipboard emoji for API Methods section in Stats Module API Reference
+[33md8bf8b3[m docs: update Stats Module API Reference to match actual SDK methods and usage
+[33m1a7c85a[m docs: update Inventory Module API Reference to remove add/remove item methods (client SDK is read-only)
+[33ma24aefb[m docs: add BeamContext Pattern, Authentication Flow, Auth, Inventory, and Stats module API docs
+[33m66efe58[m docs: fix and improve high-level architecture diagram in architecture.md

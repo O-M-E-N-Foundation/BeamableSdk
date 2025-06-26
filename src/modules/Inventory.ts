@@ -40,10 +40,11 @@ export class InventoryModule {
   /**
    * Get the inventory for a specific player
    * @param playerId The player's ID
+   * @param gamertag Optionally impersonate a player in server mode by passing gamertag
    * @returns Promise<InventoryResponse> The player's inventory data
    */
-  async getInventory(playerId: string): Promise<InventoryResponse> {
-    return this.core.request('GET', `/object/inventory/${playerId}/`, undefined, { auth: true });
+  async getInventory(playerId: string, gamertag?: string): Promise<InventoryResponse> {
+    return this.core.request('GET', `/object/inventory/${playerId}/`, undefined, gamertag ? { auth: true, gamertag } : { auth: true });
   }
   // Add more inventory methods as needed
 } 

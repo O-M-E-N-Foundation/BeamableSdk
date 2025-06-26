@@ -1,6 +1,8 @@
 # Content Module API Reference
 
-The Content module provides type-safe access to Beamable content with support for generic types and auto-generated TypeScript interfaces.
+The Content module provides type-safe access to Beamable content with support for generic types and auto-generated TypeScript interfaces. It supports both client and server (admin) modes.
+
+> **Note:** Content is read-only in the client SDK. In server mode, you can impersonate any player using the `gamertag` parameter.
 
 ## 📦 Overview
 
@@ -19,23 +21,34 @@ const context = await BeamContext.Default;
 const content = context.Content;
 ```
 
+## 🧑‍💻 Usage Examples
+
+### Client Mode
+```typescript
+const manifest = await context.Content.getPublicManifest();
+const abilityMap = await context.Content.getContent('AbilityMaps.VitalityAura');
+```
+
+### Server Mode (Admin/Backend)
+```typescript
+const playerId = '1234567890';
+const manifest = await context.Content.getPublicManifest(playerId); // gamertag = playerId
+const abilityMap = await context.Content.getContent('AbilityMaps.VitalityAura', playerId);
+```
+
 ## 📋 API Methods
 
-### `getPublicManifest()`
-
-Fetches the public content manifest containing all available content entries.
+### `getPublicManifest(gamertag?: string)`
+Fetches the public content manifest containing all available content entries. In server mode, pass the playerId as the `gamertag` to impersonate any player.
 
 **Returns:** `Promise<ContentManifestResponse>`
 
 **Example:**
 ```typescript
-const manifest = await content.getPublicManifest();
-console.log(`Found ${manifest.entries.length} content entries`);
-
-// Access manifest structure
-manifest.entries.forEach(entry => {
-  console.log(`${entry.contentId}: ${entry.uri}`);
-});
+// Client mode
+const manifest = await context.Content.getPublicManifest();
+// Server mode (impersonate)
+const manifest = await context.Content.getPublicManifest('1234567890');
 ```
 
 **Response Type:**
@@ -61,26 +74,21 @@ interface ContentManifestEntry {
 }
 ```
 
-### `getContent<T>(contentId: string)`
-
-Fetches a specific content object by its ID and returns it as the specified type.
+### `getContent<T>(contentId: string, gamertag?: string)`
+Fetches a specific content object by its ID and returns it as the specified type. In server mode, pass the playerId as the `gamertag` to impersonate any player.
 
 **Parameters:**
 - `contentId` (string): The ID of the content to fetch (e.g., 'AbilityMaps.VitalityAura')
+- `gamertag` (string, optional): Player ID to impersonate (server mode)
 
 **Returns:** `Promise<T>`
 
 **Example:**
 ```typescript
-// Fetch without type safety
-const abilityMap = await content.getContent('AbilityMaps.VitalityAura');
-console.log('Ability Map:', abilityMap.id);
-
-// Fetch with type safety (after generating types)
-import type { RootObject as AbilityMaps } from '../types/content/AbilityMaps';
-
-const typedAbilityMap = await content.getContent<AbilityMaps>('AbilityMaps.VitalityAura');
-console.log('Ability Name:', typedAbilityMap.properties.actions.data[0].abilityName);
+// Client mode
+const abilityMap = await context.Content.getContent('AbilityMaps.VitalityAura');
+// Server mode (impersonate)
+const abilityMap = await context.Content.getContent('AbilityMaps.VitalityAura', '1234567890');
 ```
 
 **Error Handling:**
@@ -96,28 +104,21 @@ try {
 }
 ```
 
-### `getContentByType<T>(contentType: string)`
-
-Fetches all content objects of a specific type.
+### `getContentByType<T>(contentType: string, gamertag?: string)`
+Fetches all content objects of a specific type. In server mode, pass the playerId as the `gamertag` to impersonate any player.
 
 **Parameters:**
 - `contentType` (string): The type of content to fetch (e.g., 'AbilityMaps', 'Minions')
+- `gamertag` (string, optional): Player ID to impersonate (server mode)
 
 **Returns:** `Promise<T[]>`
 
 **Example:**
 ```typescript
-// Fetch all ability maps
-const allAbilityMaps = await content.getContentByType('AbilityMaps');
-console.log(`Found ${allAbilityMaps.length} ability maps`);
-
-// Fetch with type safety
-import type { RootObject as AbilityMaps } from '../types/content/AbilityMaps';
-
-const typedAbilityMaps = await content.getContentByType<AbilityMaps>('AbilityMaps');
-typedAbilityMaps.forEach(abilityMap => {
-  console.log(`${abilityMap.id}: ${abilityMap.properties.actions.data[0].abilityName}`);
-});
+// Client mode
+const allAbilityMaps = await context.Content.getContentByType('AbilityMaps');
+// Server mode (impersonate)
+const allAbilityMaps = await context.Content.getContentByType('AbilityMaps', '1234567890');
 ```
 
 **Empty Results:**
