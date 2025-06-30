@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { BeamContext, configureBeamable } from '../src/core/BeamContext';
 import type { LoginResponse, RegisterUserResponse, IsEmailAvailableResponse, UpdateAccountResponse } from '../src/modules/Auth';
+import { BeamableCore } from '../src/core/BeamableCore';
+import { AuthModule } from '../src/modules/AuthModule';
 
 const cid = process.env.VITE_CID || 'test-cid';
 const pid = process.env.VITE_PID || 'test-pid';
@@ -110,5 +112,19 @@ describe('AuthModule', () => {
     const response: UpdateAccountResponse = await context.Auth.registerDevice(deviceId);
     expect(response).toBeDefined();
     // Optionally assert on response fields if known
+  });
+
+  it('should login a user with AuthModule before context and not create a guest', async () => {
+    configureBeamable({ cid, pid, apiUrl });
+    const core = new BeamableCore();
+    const auth = new AuthModule(core);
+    // Use a test user that already exists in your Beamable project
+    const username = process.env.TEST_USERNAME || 'testuser@email.com';
+    const password = process.env.TEST_PASSWORD || 'testpassword';
+    await auth.loginUser(username, password);
+    const context = await BeamContext.Default;
+    await context.onReady;
+    expect(context.playerId).toBeDefined();
+    // Optionally, check that the playerId matches the expected test user
   });
 }); 

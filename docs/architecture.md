@@ -61,7 +61,7 @@ The Beamable JavaScript SDK is built with a modular, type-safe architecture that
 The central orchestrator that provides access to all SDK functionality. Supports both client and server (admin) modes.
 
 ```typescript
-import { BeamContext } from 'BeamableSDK';
+import { BeamContext } from '@omen.foundation/beamable-sdk';
 
 class BeamContext {
   // Singleton instance
@@ -93,7 +93,7 @@ class BeamContext {
 The low-level foundation that handles HTTP communication, authentication, configuration, and request signing (server mode).
 
 ```typescript
-import { BeamableCore, BeamableConfig } from 'BeamableSDK';
+import { BeamableCore, BeamableConfig } from '@omen.foundation/beamable-sdk';
 
 class BeamableCore {
   // Static configuration

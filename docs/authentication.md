@@ -15,7 +15,7 @@ The Beamable JavaScript SDK provides a flexible authentication system supporting
 
 ### Client Mode
 ```typescript
-import { configureBeamable, BeamContext } from 'BeamableSDK';
+import { configureBeamable, BeamContext } from '@omen.foundation/beamable-sdk';
 
 configureBeamable({ cid: 'your-cid', pid: 'your-pid', apiUrl: 'https://api.beamable.com' });
 const context = await BeamContext.Default;
@@ -39,7 +39,7 @@ await context.Auth.refreshToken('your-refresh-token');
 
 ### Server Mode (Admin/Backend)
 ```typescript
-import { configureBeamable, BeamContext } from 'BeamableSDK';
+import { configureBeamable, BeamContext } from '@omen.foundation/beamable-sdk';
 
 configureBeamable({
   cid: process.env.VITE_CID!,
@@ -78,4 +78,22 @@ const account = await context.Auth.getCurrentAccount(playerId);
 - Always call `configureBeamable` before using Auth methods
 - Use `context.onReady` to ensure authentication is complete
 - Store tokens securely if you need to persist sessions
-- Use guest login for frictionless onboarding, then upgrade to full account 
+- Use guest login for frictionless onboarding, then upgrade to full account
+
+## Logging in an Existing User (No Guest Creation)
+
+You can now use the AuthModule directly from the SDK to log in an existing user before accessing BeamContext.Default. This prevents the SDK from creating a new guest user automatically.
+
+```ts
+import { configureBeamable, BeamableCore, AuthModule, BeamContext } from '@omen.foundation/beamable-sdk';
+
+configureBeamable({ cid, pid, apiUrl });
+const core = new BeamableCore();
+const auth = new AuthModule(core);
+await auth.loginUser('user@email.com', 'password');
+const context = await BeamContext.Default;
+await context.onReady;
+```
+
+- If you call `BeamContext.Default` before logging in, a new guest user will be created.
+- For advanced flows, you can also use InventoryModule, StatsModule, etc. directly from the SDK. 

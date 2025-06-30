@@ -38,13 +38,13 @@ export class InventoryModule {
   }
 
   /**
-   * Get the inventory for a specific player
+   * Get the inventory for a specific player.
+   * In server mode, this will impersonate the player by setting X-BEAM-GAMERTAG to playerId.
    * @param playerId The player's ID
-   * @param gamertag Optionally impersonate a player in server mode by passing gamertag
    * @returns Promise<InventoryResponse> The player's inventory data
    */
-  async getInventory(playerId: string, gamertag?: string): Promise<InventoryResponse> {
-    return this.core.request('GET', `/object/inventory/${playerId}/`, undefined, gamertag ? { auth: true, gamertag } : { auth: true });
+  async getInventory(playerId: string): Promise<InventoryResponse> {
+    return this.core.request('GET', `/object/inventory/${playerId}/`, undefined, { auth: true, gamertag: playerId });
   }
   // Add more inventory methods as needed
 } 

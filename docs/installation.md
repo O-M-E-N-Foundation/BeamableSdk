@@ -7,19 +7,19 @@ This guide will help you install and configure the Beamable JavaScript SDK for y
 ### NPM Installation
 
 ```bash
-npm install BeamableSDK
+npm install @omen.foundation/beamable-sdk
 ```
 
 ### Yarn Installation
 
 ```bash
-yarn add BeamableSDK
+yarn add @omen.foundation/beamable-sdk
 ```
 
 ### PNPM Installation
 
 ```bash
-pnpm add BeamableSDK
+pnpm add @omen.foundation/beamable-sdk
 ```
 
 ## 🛠️ Environment Setup
@@ -72,7 +72,7 @@ process.env.VITE_SECRET = 'your-server-secret';
 ### Basic Setup (Client Mode)
 
 ```typescript
-import { configureBeamable } from 'BeamableSDK';
+import { configureBeamable } from '@omen.foundation/beamable-sdk';
 
 // Configure the SDK with your credentials
 configureBeamable({
@@ -86,7 +86,7 @@ configureBeamable({
 ### Server Mode Setup (Admin/Backend)
 
 ```typescript
-import { configureBeamable } from 'BeamableSDK';
+import { configureBeamable } from '@omen.foundation/beamable-sdk';
 
 configureBeamable({
   cid: process.env.VITE_CID!,
@@ -130,7 +130,7 @@ export default defineConfig({
     global: 'globalThis',
   },
   optimizeDeps: {
-    include: ['BeamableSDK']
+    include: ['@omen.foundation/beamable-sdk']
   }
 });
 ```
@@ -142,7 +142,7 @@ export default defineConfig({
 Create a simple test file to verify everything is working:
 
 ```typescript
-import { configureBeamable, BeamContext } from 'BeamableSDK';
+import { configureBeamable, BeamContext } from '@omen.foundation/beamable-sdk';
 
 async function testInstallation() {
   try {
@@ -202,7 +202,7 @@ If you see network errors:
 
 ```typescript
 // In your main App.tsx or index.tsx
-import { configureBeamable } from 'BeamableSDK';
+import { configureBeamable } from '@omen.foundation/beamable-sdk';
 
 // Configure once at app startup
 configureBeamable({
@@ -216,7 +216,7 @@ configureBeamable({
 
 ```typescript
 // In your main.ts
-import { configureBeamable } from 'BeamableSDK';
+import { configureBeamable } from '@omen.foundation/beamable-sdk';
 
 configureBeamable({
   cid: import.meta.env.VITE_CID,
@@ -229,7 +229,7 @@ configureBeamable({
 
 ```typescript
 // In your main server file
-import { configureBeamable } from 'BeamableSDK';
+import { configureBeamable } from '@omen.foundation/beamable-sdk';
 import dotenv from 'dotenv';
 
 dotenv.config();

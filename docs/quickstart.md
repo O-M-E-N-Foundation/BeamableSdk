@@ -9,7 +9,7 @@ Get up and running with the Beamable JavaScript SDK in minutes. This guide will 
 First, ensure you have the SDK installed and configured (see [Installation Guide](installation.md)):
 
 ```typescript
-import { configureBeamable, BeamContext } from 'BeamableSDK';
+import { configureBeamable, BeamContext } from '@omen.foundation/beamable-sdk';
 
 // Configure the SDK (client mode)
 configureBeamable({
@@ -24,7 +24,7 @@ configureBeamable({
 To use the SDK for server/admin operations, initialize in server mode with your secret key:
 
 ```typescript
-import { configureBeamable, BeamContext } from 'BeamableSDK';
+import { configureBeamable, BeamContext } from '@omen.foundation/beamable-sdk';
 
 configureBeamable({
   cid: process.env.VITE_CID!,
@@ -189,7 +189,7 @@ console.log('Server-side stats:', statsServer);
 Here's a complete example that demonstrates the main features:
 
 ```typescript
-import { configureBeamable, BeamContext } from 'BeamableSDK';
+import { configureBeamable, BeamContext } from '@omen.foundation/beamable-sdk';
 
 async function beamableExample() {
   try {

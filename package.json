@@ -1,7 +1,7 @@
 {
-  "name": "BeamableSDK",
-  "version": "1.0.0",
-  "description": "",
+  "name": "@omen.foundation/beamable-sdk",
+  "version": "1.0.6",
+  "description": "TypeScript SDK for Beamable",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -43,5 +43,9 @@
   },
   "bin": {
     "beamable": "./dist/cli/beamable.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/omen-foundation/beamable-sdk.git"
   }
 }

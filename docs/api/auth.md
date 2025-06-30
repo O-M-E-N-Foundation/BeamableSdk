@@ -10,7 +10,7 @@ The Auth module provides all authentication-related operations for the Beamable 
 
 ### Client Mode
 ```typescript
-import { configureBeamable, BeamContext } from 'BeamableSDK';
+import { configureBeamable, BeamContext } from '@omen.foundation/beamable-sdk';
 
 configureBeamable({ cid: 'your-cid', pid: 'your-pid', apiUrl: 'https://api.beamable.com' });
 const context = await BeamContext.Default;
@@ -31,7 +31,7 @@ const account = await context.Auth.getCurrentAccount();
 
 ### Server Mode (Admin/Backend)
 ```typescript
-import { configureBeamable, BeamContext } from 'BeamableSDK';
+import { configureBeamable, BeamContext } from '@omen.foundation/beamable-sdk';
 
 configureBeamable({
   cid: process.env.VITE_CID!,

@@ -21,7 +21,7 @@ The `BeamContext` is the central orchestrator of the Beamable JavaScript SDK. It
 
 ### Client Mode
 ```typescript
-import { configureBeamable, BeamContext } from 'BeamableSDK';
+import { configureBeamable, BeamContext } from '@omen.foundation/beamable-sdk';
 
 // Configure the SDK (client mode)
 configureBeamable({
@@ -43,7 +43,7 @@ const stats = await context.Stats.getPlayerStats(context.playerId!);
 
 ### Server Mode (Admin/Backend)
 ```typescript
-import { configureBeamable, BeamContext } from 'BeamableSDK';
+import { configureBeamable, BeamContext } from '@omen.foundation/beamable-sdk';
 
 configureBeamable({
   cid: process.env.VITE_CID!,

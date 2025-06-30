@@ -7,7 +7,7 @@ const secret = process.env.VITE_SECRET || '';
 const apiUrl = process.env.VITE_API_URL || 'https://api.beamable.com';
 
 // Use a known playerId for impersonation (replace with a real/test playerId as needed)
-const testPlayerId = '1630331747350537';
+const testPlayerId = '1893163377320961';
 
 describe('Beamable Server Mode', () => {
   it('should configure SDK in server mode and fetch inventory, stats, and content as a player', async () => {
@@ -15,7 +15,7 @@ describe('Beamable Server Mode', () => {
     const context = await BeamContext.Default;
 
     // --- Inventory ---
-    const inventory = await context.Inventory.getInventory(testPlayerId, testPlayerId);
+    const inventory = await context.Inventory.getInventory(testPlayerId);
     expect(inventory).toBeDefined();
     expect(typeof inventory).toBe('object');
     // Optionally assert on currencies/items if present

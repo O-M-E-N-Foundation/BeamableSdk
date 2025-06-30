@@ -181,7 +181,7 @@ import type { RootObject as Currency } from '../types/content/currency';
 ### Type-Safe Content Fetching
 
 ```typescript
-import { BeamContext } from 'BeamableSDK';
+import { BeamContext } from '@omen.foundation/beamable-sdk';
 import type { RootObject as AbilityMaps } from '../types/content/AbilityMaps';
 
 const context = await BeamContext.Default;

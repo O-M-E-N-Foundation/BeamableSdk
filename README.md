@@ -48,7 +48,7 @@ A modern, type-safe JavaScript/TypeScript SDK for Beamable, featuring modular ar
 ## 🛠️ Quick Installation
 
 ```bash
-npm install BeamableSDK
+npm install @omen.foundation/beamable-sdk
 ```
 
 ## 🔧 Type Generation
@@ -94,7 +94,7 @@ npm run generateTypes
 
 ### Client Mode (Browser, Desktop, Mobile)
 ```typescript
-import { BeamContext, configureBeamable } from 'BeamableSDK';
+import { BeamContext, configureBeamable } from '@omen.foundation/beamable-sdk';
 
 // Configure the SDK (client mode)
 configureBeamable({
@@ -115,7 +115,7 @@ console.log(`Ability: ${abilityMap.properties.actions.data[0].abilityName}`);
 
 ### 🛡️ Server Mode (Admin/Backend)
 ```typescript
-import { BeamContext, configureBeamable } from 'BeamableSDK';
+import { BeamContext, configureBeamable } from '@omen.foundation/beamable-sdk';
 
 configureBeamable({
   cid: process.env.VITE_CID!,
@@ -193,4 +193,21 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Need help?** Check out our [Troubleshooting Guide](docs/troubleshooting.md) or [open an issue](https://github.com/your-org/beamable-javascript-sdk/issues). 
+**Need help?** Check out our [Troubleshooting Guide](docs/troubleshooting.md) or [open an issue](https://github.com/your-org/beamable-javascript-sdk/issues).
+
+## Advanced Usage: Manual Login Before Context
+
+If you want to log in an existing user (and avoid creating a new guest user), you can use the AuthModule directly:
+
+```ts
+import { configureBeamable, BeamableCore, AuthModule, BeamContext } from '@omen.foundation/beamable-sdk';
+
+configureBeamable({ cid, pid, apiUrl });
+const core = new BeamableCore();
+const auth = new AuthModule(core);
+await auth.loginUser('user@email.com', 'password');
+const context = await BeamContext.Default;
+await context.onReady;
+```
+
+This pattern works for all login methods (username/password, third-party, etc.). 

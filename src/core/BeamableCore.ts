@@ -72,7 +72,7 @@ export class BeamableCore {
     }
     // Server mode: sign the request
     if (this.config.mode === 'server' && this.config.secret) {
-      const signature = this.calculateSignature(path, data);
+      const signature = this.calculateSignature(path, data, method);
       headers['X-BEAM-SIGNATURE'] = signature;
     }
     // Add gamertag if provided
@@ -84,6 +84,9 @@ export class BeamableCore {
       headers,
       ...(data && method !== 'GET' ? { body: JSON.stringify(data) } : {}),
     };
+
+    //console.log('fetchOpts', fetchOpts);
+
     const response = await fetch(url, fetchOpts);
     if (!response.ok) {
       let error;
@@ -116,11 +119,12 @@ export class BeamableCore {
    * @param uriPathAndQuery The API path (should start with /)
    * @param body The request body (object or undefined)
    */
-  private calculateSignature(uriPathAndQuery: string, body?: object | null): string {
+  private calculateSignature(uriPathAndQuery: string, body?: object | null, method?: string): string {
     // Signature: Base64(MD5(secret + pid + version + uriPathAndQuery + (body as JSON)))
+    // For DELETE requests, omit the body from the signature even if present
     const version = '1';
     let dataToSign = `${this.config.secret}${this.config.pid}${version}${uriPathAndQuery}`;
-    if (body) dataToSign += JSON.stringify(body);
+    if (body && method !== 'DELETE') dataToSign += JSON.stringify(body);
     const md5 = CryptoJS.MD5(dataToSign);
     return CryptoJS.enc.Base64.stringify(md5);
   }

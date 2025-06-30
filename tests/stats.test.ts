@@ -124,4 +124,69 @@ describe('StatsModule', () => {
     console.log('Get Stat (game domain) Response:', getGame);
     expect(getGame).toBeDefined();
   });
+
+  it.only('should set and increment a "wins" stat, verifying string storage', async () => {
+    // Step 1: Get a playerId using client mode
+    configureBeamable({ cid, pid, apiUrl });
+    const clientContext = await BeamContext.Default;
+    await clientContext.onReady;
+    expect(clientContext.playerId).toBeDefined();
+    const playerId = clientContext.playerId!;
+
+    // Step 2: Switch to server mode
+    const secret = process.env.VITE_SECRET || 'test-secret';
+    configureBeamable({ cid, pid, apiUrl, secret, mode: 'server' });
+    // Force BeamContext to re-instantiate with new config
+    // @ts-ignore
+    BeamContext._default = null;
+    const serverContext = await BeamContext.Default;
+    await serverContext.onReady;
+    // Build public objectId for stats
+    const publicObjectId = serverContext.Stats.constructor['buildPlayerObjectId'](playerId, 'client', 'public');
+
+    const statKey = 'wins';
+
+    // Set 'wins' to 1 (as number)
+    console.log('Calling setStats (init wins=1)');
+    const set1 = await serverContext.Stats.setStats(publicObjectId, { [statKey]: 1 }, playerId.toString());
+    console.log('setStats result:', set1);
+    expect(set1).toBeDefined();
+
+    // Get and verify 'wins' is '1' (string or number)
+    console.log('Calling getStats (expect wins=1)');
+    const get1 = await serverContext.Stats.getStats(publicObjectId, playerId.toString());
+    console.log('getStats result:', get1);
+    expect(get1.stats).toBeDefined();
+    expect(String(get1.stats[statKey])).toBe('1');
+
+    // Increment 'wins' by 1
+    console.log('Calling incrementStats (add wins+1)');
+    let inc;
+    try {
+      inc = await serverContext.Stats.incrementStats(publicObjectId, { [statKey]: 1 }, playerId.toString());
+      console.log('incrementStats result:', inc);
+    } catch (e) {
+      console.error('incrementStats error:', e);
+      throw e;
+    }
+    expect(inc).toBeDefined();
+
+    // Get and verify 'wins' is '2' (string or number)
+    console.log('Calling getStats (expect wins=2)');
+    let get2;
+    try {
+      get2 = await serverContext.Stats.getStats(publicObjectId, playerId.toString());
+      console.log('getStats after increment result:', get2);
+    } catch (e) {
+      console.error('getStats after increment error:', e);
+      throw e;
+    }
+    expect(get2.stats).toBeDefined();
+    expect(String(get2.stats[statKey])).toBe('2');
+
+    // Clean up: delete the 'wins' stat
+    console.log('Calling deleteStats (cleanup)');
+    await serverContext.Stats.deleteStats(publicObjectId, [statKey], playerId.toString());
+    console.log('deleteStats done');
+  });
 }); 

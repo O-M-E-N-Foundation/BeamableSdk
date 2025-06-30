@@ -15,7 +15,7 @@ The Content module allows you to:
 ## 🔧 Basic Usage
 
 ```typescript
-import { BeamContext } from 'BeamableSDK';
+import { BeamContext } from '@omen.foundation/beamable-sdk';
 
 const context = await BeamContext.Default;
 const content = context.Content;
@@ -273,7 +273,7 @@ const batchResults = await fetchMultipleContent([
 ### Complete Content Management Example
 
 ```typescript
-import { BeamContext } from 'BeamableSDK';
+import { BeamContext } from '@omen.foundation/beamable-sdk';
 import type { RootObject as AbilityMaps } from '../types/content/AbilityMaps';
 import type { RootObject as Minions } from '../types/content/Minions';
 
