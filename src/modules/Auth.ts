@@ -103,6 +103,8 @@ export class AuthModule {
       password,
     }, gamertag ? { gamertag } : undefined);
     this.core.setTokens(response.access_token, response.refresh_token);
+    console.log('AuthModule.loginUser: setTokens called with', response.access_token, response.refresh_token);
+    console.log('AuthModule.loginUser: core tokens after setTokens', this.core.getTokens());
     this.context?._resolveOnReady();
     return response;
   }
@@ -113,6 +115,8 @@ export class AuthModule {
       email: usernameOrEmail,
       password,
     }, gamertag ? { auth: true, gamertag } : { auth: true });
+    console.log('AuthModule.registerUser: response', response);
+    console.log('AuthModule.registerUser: core tokens after register', this.core.getTokens());
     return response;
   }
 

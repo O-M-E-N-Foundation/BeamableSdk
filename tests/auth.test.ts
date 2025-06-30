@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { BeamContext, configureBeamable } from '../src/core/BeamContext';
 import type { LoginResponse, RegisterUserResponse, IsEmailAvailableResponse, UpdateAccountResponse } from '../src/modules/Auth';
 import { BeamableCore } from '../src/core/BeamableCore';
-import { AuthModule } from '../src/modules/AuthModule';
+import { AuthModule } from '../src/modules/Auth';
 
 const cid = process.env.VITE_CID || 'test-cid';
 const pid = process.env.VITE_PID || 'test-pid';
@@ -18,25 +18,24 @@ describe('AuthModule', () => {
     expect(typeof result.available).toBe('boolean');
   });
 
-  it('should register a new user with username or email and then login', async () => {
+  it('should register a new user, login, and verify context.playerId matches the logged-in user', async () => {
     configureBeamable({ cid, pid, apiUrl });
+    // 1. Create a guest context
     const context = await BeamContext.Default;
-    await context.onReady; // Ensure guest session is established
-    // Generate a random username/email and password for each test run
+    await context.onReady;
+    // 2. Register the user (upgrades the guest)
     const randomStr = Math.random().toString(36).substring(2, 10);
     const testUser = `testuser_${randomStr}@mantical.ai`;
     const testPassword = `TestPassword_${randomStr}!`;
-    const registerResponse: RegisterUserResponse = await context.Auth.registerUser(testUser, testPassword);
+    const registerResponse = await context.Auth.registerUser(testUser, testPassword);
     expect(registerResponse).toBeDefined();
-    expect(typeof registerResponse).toBe('object');
-    // Now login with the same credentials
-    const loginResponse: LoginResponse = await context.Auth.loginUser(testUser, testPassword);
-    console.log('LoginResponse:', loginResponse);
-    expect(loginResponse).toBeDefined();
-    expect(loginResponse).toHaveProperty('access_token');
-    expect(loginResponse).toHaveProperty('refresh_token');
-    expect(typeof loginResponse.access_token).toBe('string');
-    expect(typeof loginResponse.refresh_token).toBe('string');
+    // 3. Log in with the new credentials
+    await context.Auth.loginUser(testUser, testPassword);
+    // 4. Fetch the account info after login
+    const account = await context.Auth.getCurrentAccount();
+    const expectedPlayerId = account.id;
+    expect(context.playerId).toBeDefined();
+    expect(context.playerId).toBe(expectedPlayerId);
   });
 
   it('should get the current account info for the logged-in user', async () => {
@@ -122,9 +121,12 @@ describe('AuthModule', () => {
     const username = process.env.TEST_USERNAME || 'testuser@email.com';
     const password = process.env.TEST_PASSWORD || 'testpassword';
     await auth.loginUser(username, password);
+    // Fetch the account info after login
+    const account = await auth.getCurrentAccount();
+    const expectedPlayerId = account.id;
     const context = await BeamContext.Default;
     await context.onReady;
     expect(context.playerId).toBeDefined();
-    // Optionally, check that the playerId matches the expected test user
+    expect(context.playerId).toBe(expectedPlayerId);
   });
 }); 

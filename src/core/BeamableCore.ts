@@ -10,9 +10,9 @@ export interface BeamableConfig {
 }
 
 export class BeamableCore {
+  private static accessToken: string | null = null;
+  private static refreshToken: string | null = null;
   private config: BeamableConfig;
-  private accessToken: string | null = null;
-  private refreshToken: string | null = null;
 
   static _globalConfig: BeamableConfig | null = null;
 
@@ -32,12 +32,12 @@ export class BeamableCore {
   }
 
   setTokens(accessToken: string, refreshToken?: string) {
-    this.accessToken = accessToken;
-    if (refreshToken) this.refreshToken = refreshToken;
+    BeamableCore.accessToken = accessToken;
+    if (refreshToken) BeamableCore.refreshToken = refreshToken;
   }
 
   getTokens() {
-    return { accessToken: this.accessToken, refreshToken: this.refreshToken };
+    return { accessToken: BeamableCore.accessToken, refreshToken: BeamableCore.refreshToken };
   }
 
   /**
@@ -67,8 +67,8 @@ export class BeamableCore {
       'X-BEAM-SCOPE': `${this.config.cid}.${this.config.pid}`,
     };
     // Add Authorization for client mode
-    if (opts.auth && this.accessToken && this.config.mode !== 'server') {
-      headers['Authorization'] = `Bearer ${this.accessToken}`;
+    if (opts.auth && BeamableCore.accessToken && this.config.mode !== 'server') {
+      headers['Authorization'] = `Bearer ${BeamableCore.accessToken}`;
     }
     // Server mode: sign the request
     if (this.config.mode === 'server' && this.config.secret) {

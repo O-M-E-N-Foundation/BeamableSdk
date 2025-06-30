@@ -28,6 +28,12 @@ All notable changes to this project will be documented in this file.
 - Documentation overhaul: clarified client/server usage, impersonation, and security best practices.
 - Added GitHub repository metadata to `package.json`.
 
+## [1.0.7] - 2024-05-XX
+### Fixed
+- Centralized access and refresh tokens in BeamableCore. All SDK instances and static methods now share the same authentication state.
+- Fixed issues where logging in with one instance did not update the token for BeamContext.Default or other modules.
+- Ensures correct player context after login in both tests and real applications.
+
 ## [1.0.0] - 2024-05-XX
 ### Added
 - Initial release of the Beamable JavaScript/TypeScript SDK.
